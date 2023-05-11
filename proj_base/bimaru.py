@@ -6,11 +6,7 @@
 # 00000 Nome1
 # 00000 Nome2
 
-<<<<<<< Updated upstream
-import sys
-=======
 import sys, random, copy
->>>>>>> Stashed changes
 from sys import stdin
 
 from search import (
@@ -129,8 +125,6 @@ class Bimaru(Problem):
         # TODO
         pass
 
-<<<<<<< Updated upstream
-=======
         actions_list = []
         
         #fill rows or columns already completed
@@ -157,17 +151,11 @@ class Bimaru(Problem):
 
 
     #Receives a state and an action and return the state after aplying the action
->>>>>>> Stashed changes
     def result(self, state: BimaruState, action):
         """Retorna o estado resultante de executar a 'action' sobre
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de
         self.actions(state)."""
-<<<<<<< Updated upstream
-        # TODO
-        pass
-
-=======
 
         aux = copy.deepcopy(state)
         
@@ -198,7 +186,6 @@ class Bimaru(Problem):
 
 
     #Receives a state and checks if it is a solution for the problem
->>>>>>> Stashed changes
     def goal_test(self, state: BimaruState):
         """Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro
@@ -219,23 +206,11 @@ if __name__ == "__main__":
 
     #Exemplo 1:
     board = Board.parse_instance()
-<<<<<<< Updated upstream
-    board.print_board()
-
-    print(board.adjacent_vertical_values(3, 3))
-    print(board.adjacent_horizontal_values(3, 3))
-
-    print(board.adjacent_vertical_values(1, 0))
-    print(board.adjacent_horizontal_values(1, 0))
-
-    print(board.get_value(0,0))
-=======
     # Criar uma instância de Bimaru:
     problem = Bimaru(board)
 
     sr = breadth_first_tree_search(problem)
     print(sr)
->>>>>>> Stashed changes
 
     # Ler o ficheiro do standard input,
     # Usar uma técnica de procura para resolver a instância,
