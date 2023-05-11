@@ -524,13 +524,12 @@ if __name__ == "__main__":
     # TODO:
 
     board = Board.parse_instance()
+
     # Criar uma instância de Bimaru:
     problem = Bimaru(board)
 
-    problem = Bimaru(board)
-
-    sr = depth_first_tree_search(problem)
-    sr.state.board.print()
+    goal = depth_first_tree_search(problem)
+    goal.state.board.print()
     
     # Ler o ficheiro do standard input,
     # Usar uma técnica de procura para resolver a instância,
