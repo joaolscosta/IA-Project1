@@ -529,7 +529,7 @@ if __name__ == "__main__":
 
     problem = Bimaru(board)
 
-    sr = breadth_first_tree_search(problem)
+    sr = depth_first_tree_search(problem)
     sr.state.board.print()
     
     # Ler o ficheiro do standard input,
