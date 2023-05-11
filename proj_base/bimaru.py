@@ -6,7 +6,11 @@
 # 00000 Nome1
 # 00000 Nome2
 
+<<<<<<< Updated upstream
 import sys
+=======
+import sys, random, copy
+>>>>>>> Stashed changes
 from sys import stdin
 
 from search import (
@@ -125,14 +129,76 @@ class Bimaru(Problem):
         # TODO
         pass
 
+<<<<<<< Updated upstream
+=======
+        actions_list = []
+        
+        #fill rows or columns already completed
+        for i in range(10):
+            if (state.board.rows[i] == 0 or state.board.columns[i] == 0):
+                actions_list.append(fill_water(state))
+                break
+        
+        #Place a boat
+        if (state.board.boats_4 < 1 or state.board.boats_3 < 2 or
+        state.board.boats_2 < 3 or state.board.boats_1 < 4):
+            for x in place_boat(state):
+                actions_list.append(x)
+
+        #Reevaluate hints actions list
+        state.board.hints_actions = check_hints_actions(state.board, state.board.hints)
+
+        for x in state.board.hints_actions:
+            if (len(x) > 0):
+                for k in x:
+                    actions_list.append(k)
+
+        return actions_list
+
+
+    #Receives a state and an action and return the state after aplying the action
+>>>>>>> Stashed changes
     def result(self, state: BimaruState, action):
         """Retorna o estado resultante de executar a 'action' sobre
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de
         self.actions(state)."""
+<<<<<<< Updated upstream
         # TODO
         pass
 
+=======
+
+        aux = copy.deepcopy(state)
+        
+        for a in action:
+            #Filled lines go with -1 so they don't be selected again
+            if (type(a) is list):
+                for i in range(len(a[0])):
+                    aux.board.rows[a[0][i]] = -1
+                for i in range(len(a[1])):
+                    aux.board.columns[a[1][i]] = -1
+            elif (a == "boat_4"):
+                aux.board.boats_4 += 1
+            elif (a == "boat_3"):
+                aux.board.boats_3 += 1
+            elif (a == "boat_2"):
+                aux.board.boats_2 += 1
+            elif (type(a) is tuple and a[0] == "hint"):
+                aux.board.hints.remove(a[1])
+                aux.board.hints_actions_num -= 1
+            else:
+                aux.board[a[0]][a[1]] = a[2]
+                if (a[2] == 't' or a[2] == 'm' or a[2] == 'b' or
+                a[2] == 'r' or a[2] == 'l' or a[2] == 'c'):
+                    aux.board.rows[a[0]] -= 1
+                    aux.board.columns[a[1]] -= 1
+
+        return BimaruState(aux.board)
+
+
+    #Receives a state and checks if it is a solution for the problem
+>>>>>>> Stashed changes
     def goal_test(self, state: BimaruState):
         """Retorna True se e só se o estado passado como argumento é
         um estado objetivo. Deve verificar se todas as posições do tabuleiro
@@ -153,6 +219,7 @@ if __name__ == "__main__":
 
     #Exemplo 1:
     board = Board.parse_instance()
+<<<<<<< Updated upstream
     board.print_board()
 
     print(board.adjacent_vertical_values(3, 3))
@@ -162,6 +229,13 @@ if __name__ == "__main__":
     print(board.adjacent_horizontal_values(1, 0))
 
     print(board.get_value(0,0))
+=======
+    # Criar uma instância de Bimaru:
+    problem = Bimaru(board)
+
+    sr = breadth_first_tree_search(problem)
+    print(sr)
+>>>>>>> Stashed changes
 
     # Ler o ficheiro do standard input,
     # Usar uma técnica de procura para resolver a instância,
