@@ -63,6 +63,7 @@ class Board:
                 circle_water(self, hints[i][0], hints[i][1])
                 self.rows[x_cord] = int(self.rows[x_cord]) - 1
                 self.columns[y_cord] = int(self.columns[y_cord]) - 1
+                self.boats_1 += 1
 
             elif (self.board[x_cord][y_cord] == 'T' or
             self.board[x_cord][y_cord] == 'M' or self.board[x_cord][y_cord] == 'B' or
@@ -81,21 +82,11 @@ class Board:
 
         for i in range(len(self.rows)):
             for j in range(len(self.columns)):
-                if (self.board[i][j] == None):
+                if (self.board[i][j] == None or self.board[i][j] == 'w'):
                     print('.', end="")
                 else:    
                     print(self.board[i][j], end="")
-            if (self.rows[i] == -1):
-                print('c')
-            else:
-                print(self.rows[i])
-        for i in range(10):
-            if (self.columns[i] == -1):
-                print('c', end="")
-            else:
-                print(self.columns[i], end="")
-        
-        print("\n")
+            print('\n', end="")
 
 
     def __getitem__(self, item):
@@ -217,6 +208,8 @@ class Bimaru(Problem):
                 aux.board.boats_3 += 1
             elif (a == "boat_2"):
                 aux.board.boats_2 += 1
+            elif (a == "boat_1"):
+                aux.board.boats_1 += 1
             elif (type(a) is tuple and a[0] == "hint"):
                 aux.board.hints.remove(a[1])
                 aux.board.hints_actions_num -= 1
@@ -237,14 +230,14 @@ class Bimaru(Problem):
         estão preenchidas de acordo com as regras do problema."""
         
         for i in range(10):
-            if (state.board.rows[i] != 0 or state.board.columns[i] != 0):
+            if (state.board.rows[i] > 0 or state.board.columns[i] > 0):
                 return False
             
-            if(state.board.boats_4 != 1 or
-               state.board.boats_3 != 2 or
-               state.board.boats_2 != 3 or
-               state.board.boats_1 != 4):
-                return False
+        if(state.board.boats_4 != 1 or
+           state.board.boats_3 != 2 or
+           state.board.boats_2 != 3 or
+           state.board.boats_1 != 4):
+            return False
 
         return True
         
@@ -298,11 +291,36 @@ def place_boat(state: BimaruState):
                             action_list.append(["boat_4", (j, i, 't'), (j+1, i, 'm'), (j+2, i, 'm'), (j+3, i, 'b')])
     
     elif (state.board.boats_3 < 2):
-        z=1
+        for i in range(10):
+            if (state.board.rows[i] >= 3):
+                for j in range(8):
+                        if (can_place_boat(state.board, i, j, 3, "horizontal")):
+                            action_list.append(["boat_3", (i, j, 'l'), (i, j+1, 'm'), (i, j+2, 'r')])
+            if (state.board.columns[i] >= 3):
+                for j in range(8):
+                        #Check there is no boat around the possible position
+                        if (can_place_boat(state.board, j, i, 3, "vertical")):
+                            action_list.append(["boat_3", (j, i, 't'), (j+1, i, 'm'), (j+2, i, 'b')])
+    
     elif (state.board.boats_2 < 3):
-        z=1
+        for i in range(10):
+            if (state.board.rows[i] >= 2):
+                for j in range(9):
+                        if (can_place_boat(state.board, i, j, 2, "horizontal")):
+                            action_list.append(["boat_2", (i, j, 'l'), (i, j+1, 'r')])
+            if (state.board.columns[i] >= 2):
+                for j in range(9):
+                        #Check there is no boat around the possible position
+                        if (can_place_boat(state.board, j, i, 2, "vertical")):
+                            action_list.append(["boat_2", (j, i, 't'), (j+1, i, 'b')])
+    
     elif (state.board.boats_1 < 4):
-        z=1
+        for i in range(10):
+            if (state.board.rows[i] >= 1):
+                for j in range(10):
+                        if (can_place_boat(state.board, i, j, 1, "horizontal")):
+                            action_list.append(["boat_1", (i, j, 'c')])
+
     return action_list
 
 
@@ -512,8 +530,8 @@ if __name__ == "__main__":
     problem = Bimaru(board)
 
     sr = breadth_first_tree_search(problem)
-    print(sr)
-
+    sr.state.board.print()
+    
     # Ler o ficheiro do standard input,
     # Usar uma técnica de procura para resolver a instância,
     # Retirar a solução a partir do nó resultante,
