@@ -6,7 +6,7 @@
 # 103603 Pedro Tavares
 # 102078 João Costa
 
-import sys, random, copy
+import sys, copy
 from sys import stdin
 
 from search import (
