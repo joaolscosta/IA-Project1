@@ -364,13 +364,13 @@ def check_hints_actions(board: Board, hints: list):
         board.rows[x_cord] += 1
         board.columns[y_cord] += 1
         if (x[2] == 'T'):
-            if (board[x_cord + 2][y_cord] == 'B'):
+            if (is_valid_position(x_cord+2, y_cord) and board[x_cord + 2][y_cord] == 'B'):
                 x_cord_str = str(x_cord+2)
                 y_cord_str = str(y_cord)
                 hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])),
                 ("hint", (x_cord_str, y_cord_str, 'B')), "boat_3",
                 (x_cord+1, y_cord, 'm')])
-            if (board[x_cord + 3][y_cord] == 'B'):
+            if (is_valid_position(x_cord+3, y_cord) and board[x_cord + 3][y_cord] == 'B'):
                 x_cord_str = str(x_cord+3)
                 y_cord_str = str(y_cord)
                 hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])),
@@ -400,13 +400,13 @@ def check_hints_actions(board: Board, hints: list):
             hints_counter += 1
 
         elif (x[2] == 'L'):
-            if (board[x_cord][y_cord + 2] == 'R'):
+            if (is_valid_position(x_cord, y_cord+2) and board[x_cord][y_cord + 2] == 'R'):
                 x_cord_str = str(x_cord)
                 y_cord_str = str(y_cord+2)
                 hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])),
                 ("hint", (x_cord_str, y_cord_str, 'R')), "boat_3",
                 (x_cord, y_cord+1, 'm')])
-            if (board[x_cord][y_cord + 3] == 'R'):
+            if (is_valid_position(x_cord, y_cord+3) and board[x_cord][y_cord + 3] == 'R'):
                 x_cord_str = str(x_cord)
                 y_cord_str = str(y_cord+3)
                 hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])),
@@ -488,6 +488,8 @@ def can_place_boat(board, row, column, size, direction):
 
     if (direction == "horizontal"):
         for i in range(size):
+            if (is_valid_position(row, column + i) == False):
+                return False
             if (board[row][column + i] != None):
                 return False
             if (board.columns[column + i] < 1):
@@ -510,6 +512,8 @@ def can_place_boat(board, row, column, size, direction):
                 i += 1
     else:
         for i in range(size):
+            if (is_valid_position(row + i, column) == False):
+                return False
             if (board[row + i][column] != None):
                 return False
             if (board.rows[row + i] < 1):
