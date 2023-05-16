@@ -331,21 +331,21 @@ def circle_water(board: Board, row, column):
     x_cord = int(row)
     y_cord = int(column)
     
-    if (is_valid_position(x_cord-1,y_cord-1)):
+    if (is_valid_position(x_cord-1,y_cord-1) and board[x_cord-1][y_cord-1] == None):
         board[x_cord-1][y_cord-1] = 'w'
-    if (is_valid_position(x_cord-1,y_cord)):
+    if (is_valid_position(x_cord-1,y_cord) and board[x_cord-1][y_cord] == None):
         board[x_cord-1][y_cord] = 'w'
-    if (is_valid_position(x_cord-1,y_cord+1)):
+    if (is_valid_position(x_cord-1,y_cord+1) and board[x_cord-1][y_cord+1] == None):
         board[x_cord-1][y_cord+1] = 'w'
-    if (is_valid_position(x_cord,y_cord-1)):
+    if (is_valid_position(x_cord,y_cord-1) and board[x_cord][y_cord-1] == None):
         board[x_cord][y_cord-1] = 'w'
-    if (is_valid_position(x_cord,y_cord+1)):
+    if (is_valid_position(x_cord,y_cord+1) and board[x_cord][y_cord+1] == None):
         board[x_cord][y_cord+1] = 'w'
-    if (is_valid_position(x_cord+1,y_cord-1)):
+    if (is_valid_position(x_cord+1,y_cord-1) and board[x_cord+1][y_cord-1] == None):
         board[x_cord+1][y_cord-1] = 'w'
-    if (is_valid_position(x_cord+1,y_cord)):
+    if (is_valid_position(x_cord+1,y_cord) and board[x_cord+1][y_cord] == None):
         board[x_cord+1][y_cord] = 'w'
-    if (is_valid_position(x_cord+1,y_cord+1)):
+    if (is_valid_position(x_cord+1,y_cord+1) and board[x_cord+1][y_cord+1] == None):
         board[x_cord+1][y_cord+1] = 'w'
 
 
