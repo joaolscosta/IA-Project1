@@ -72,8 +72,9 @@ class Board:
                 self.columns[y_cord] = int(self.columns[y_cord]) - 1
                 self.hints_actions_num += 1
                 self.hints.append((hints[i][0], hints[i][1], hints[i][2]))
-
-        self.hints_actions = check_hints_actions(self, hints)
+        
+        check_completed_boats(self, self.hints)
+        self.hints_actions = check_hints_actions(self, self.hints)
             
 
     #Prints the board
@@ -346,6 +347,55 @@ def circle_water(board: Board, row, column):
         board[x_cord+1][y_cord] = 'w'
     if (is_valid_position(x_cord+1,y_cord+1)):
         board[x_cord+1][y_cord+1] = 'w'
+
+
+def check_completed_boats(board: Board, hints: list):
+    for x in hints:
+        x_cord = int(x[0])
+        y_cord = int(x[1])
+        board[x_cord][y_cord] = None
+        board.rows[x_cord] += 1
+        board.columns[y_cord] += 1
+        if (x[2] == 'T'):
+            pos_x = str(x_cord)
+            pos_y = str(y_cord)
+        
+            if(board[x_cord+1][y_cord] == 'M' and board[x_cord+2][y_cord] == 'M' and board[x_cord+3][y_cord] == 'B'):
+                board.hints_actions_num -= 4
+                pos_x1 = str(x_cord + 1)
+                pos_x2 = str(x_cord + 2)
+                pos_x3 = str(x_cord + 3)
+                
+                board.hints.remove((pos_x, pos_y, 'T'))
+                board.hints.remove((pos_x1, pos_y, 'M'))
+                board.hints.remove((pos_x2, pos_y, 'M'))
+                board.hints.remove((pos_x3, pos_y, 'B'))
+                
+                board.boats_4 += 1
+            if(board[x_cord+1][y_cord] == 'M' and board[x_cord+2][y_cord] == 'B'):
+                board.hints_actions_num -= 3
+                pos_x1 = str(x_cord + 1)
+                pos_x2 = str(x_cord + 2)
+                
+                board.hints.remove((pos_x, pos_y, 'T'))
+                board.hints.remove((pos_x1, pos_y, 'M'))
+                board.hints.remove((pos_x2, pos_y, 'B'))
+                
+                board.boats_3 += 1
+            if(board[x_cord+1][y_cord] == 'B'):
+                board.hints_actions_num -= 2
+
+                pos_x1 = str(x_cord + 1)
+                
+                board.hints.remove((pos_x, pos_y, 'T'))
+                board.hints.remove((pos_x1, pos_y, 'B'))
+                
+                board.boats_2 += 1
+
+        board[x_cord][y_cord] = x[2]
+        board.rows[x_cord] -= 1
+        board.columns[y_cord] -= 1
+    return 0
 
 
 #Check what actions can be made from the given hints
