@@ -31,8 +31,6 @@ class BimaruState:
     def __lt__(self, other):
         return self.id < other.id
 
-    # TODO: outros metodos da classe
-
 
 class Board:
     #Internal representation of a Bimaru board
@@ -146,8 +144,6 @@ class Board:
 
         board = Board(rows, columns, hints)
         return board
-
-    # TODO: outros metodos da classe
 
 
 class Bimaru(Problem):
@@ -360,7 +356,9 @@ def check_completed_boats(board: Board, hints: list):
             pos_x = str(x_cord)
             pos_y = str(y_cord)
         
-            if(board[x_cord+1][y_cord] == 'M' and board[x_cord+2][y_cord] == 'M' and board[x_cord+3][y_cord] == 'B'):
+            if(is_valid_position(x_cord+1, y_cord) and board[x_cord+1][y_cord] == 'M' and 
+            is_valid_position(x_cord+2, y_cord) and board[x_cord+2][y_cord] == 'M' and 
+            is_valid_position(x_cord+3, y_cord) and board[x_cord+3][y_cord] == 'B'):
                 board.hints_actions_num -= 4
                 pos_x1 = str(x_cord + 1)
                 pos_x2 = str(x_cord + 2)
@@ -372,7 +370,8 @@ def check_completed_boats(board: Board, hints: list):
                 board.hints.remove((pos_x3, pos_y, 'B'))
                 
                 board.boats_4 += 1
-            if(board[x_cord+1][y_cord] == 'M' and board[x_cord+2][y_cord] == 'B'):
+            if(is_valid_position(x_cord+1, y_cord) and board[x_cord+1][y_cord] == 'M' and
+            is_valid_position(x_cord+2, y_cord) and board[x_cord+2][y_cord] == 'B'):
                 board.hints_actions_num -= 3
                 pos_x1 = str(x_cord + 1)
                 pos_x2 = str(x_cord + 2)
@@ -382,7 +381,7 @@ def check_completed_boats(board: Board, hints: list):
                 board.hints.remove((pos_x2, pos_y, 'B'))
                 
                 board.boats_3 += 1
-            if(board[x_cord+1][y_cord] == 'B'):
+            if(is_valid_position(x_cord+1, y_cord) and board[x_cord+1][y_cord] == 'B'):
                 board.hints_actions_num -= 2
 
                 pos_x1 = str(x_cord + 1)
@@ -396,7 +395,9 @@ def check_completed_boats(board: Board, hints: list):
             pos_x = str(x_cord)
             pos_y = str(y_cord)
         
-            if(board[x_cord][y_cord+1] == 'M' and board[x_cord][y_cord+2] == 'M' and board[x_cord][y_cord+3] == 'R'):
+            if(is_valid_position(x_cord, y_cord+1) and board[x_cord][y_cord+1] == 'M' and
+            is_valid_position(x_cord, y_cord+2) and board[x_cord][y_cord+2] == 'M' and
+            is_valid_position(x_cord, y_cord+3) and board[x_cord][y_cord+3] == 'R'):
                 board.hints_actions_num -= 4
                 pos_y1 = str(y_cord + 1)
                 pos_y2 = str(y_cord + 2)
@@ -408,7 +409,8 @@ def check_completed_boats(board: Board, hints: list):
                 board.hints.remove((pos_x, pos_y3, 'R'))
                 
                 board.boats_4 += 1
-            if(board[x_cord][y_cord+1] == 'M' and board[x_cord][y_cord+2] == 'R'):
+            if(is_valid_position(x_cord, y_cord+1) and board[x_cord][y_cord+1] == 'M' and
+            is_valid_position(x_cord, y_cord+2) and board[x_cord][y_cord+2] == 'R'):
                 board.hints_actions_num -= 3
                 pos_y1 = str(y_cord + 1)
                 pos_y2 = str(y_cord + 2)
@@ -418,7 +420,7 @@ def check_completed_boats(board: Board, hints: list):
                 board.hints.remove((pos_x, pos_y2, 'R'))
                 
                 board.boats_3 += 1
-            if(board[x_cord][y_cord+1] == 'R'):
+            if(is_valid_position(x_cord, y_cord+1) and board[x_cord][y_cord+1] == 'R'):
                 board.hints_actions_num -= 2
                 pos_y1 = str(y_cord + 1)
                 
@@ -426,6 +428,7 @@ def check_completed_boats(board: Board, hints: list):
                 board.hints.remove((pos_x, pos_y1, 'R'))
                 
                 board.boats_2 += 1
+
         board[x_cord][y_cord] = x[2]
         board.rows[x_cord] -= 1
         board.columns[y_cord] -= 1
@@ -633,7 +636,6 @@ def is_empty_space(board, row, column):
             return True
 
 if __name__ == "__main__":
-    # TODO:
 
     board = Board.parse_instance()
 
