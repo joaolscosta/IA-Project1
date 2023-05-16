@@ -391,7 +391,41 @@ def check_completed_boats(board: Board, hints: list):
                 board.hints.remove((pos_x1, pos_y, 'B'))
                 
                 board.boats_2 += 1
-
+        
+        if (x[2] == 'L'):
+            pos_x = str(x_cord)
+            pos_y = str(y_cord)
+        
+            if(board[x_cord][y_cord+1] == 'M' and board[x_cord][y_cord+2] == 'M' and board[x_cord][y_cord+3] == 'R'):
+                board.hints_actions_num -= 4
+                pos_y1 = str(y_cord + 1)
+                pos_y2 = str(y_cord + 2)
+                pos_y3 = str(y_cord + 3)
+                
+                board.hints.remove((pos_x, pos_y, 'L'))
+                board.hints.remove((pos_x, pos_y1, 'M'))
+                board.hints.remove((pos_x, pos_y2, 'M'))
+                board.hints.remove((pos_x, pos_y3, 'R'))
+                
+                board.boats_4 += 1
+            if(board[x_cord][y_cord+1] == 'M' and board[x_cord][y_cord+2] == 'R'):
+                board.hints_actions_num -= 3
+                pos_y1 = str(y_cord + 1)
+                pos_y2 = str(y_cord + 2)
+                
+                board.hints.remove((pos_x, pos_y, 'L'))
+                board.hints.remove((pos_x, pos_y1, 'M'))
+                board.hints.remove((pos_x, pos_y2, 'R'))
+                
+                board.boats_3 += 1
+            if(board[x_cord][y_cord+1] == 'R'):
+                board.hints_actions_num -= 2
+                pos_y1 = str(y_cord + 1)
+                
+                board.hints.remove((pos_x, pos_y, 'L'))
+                board.hints.remove((pos_x, pos_y1, 'R'))
+                
+                board.boats_2 += 1
         board[x_cord][y_cord] = x[2]
         board.rows[x_cord] -= 1
         board.columns[y_cord] -= 1
