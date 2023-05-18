@@ -58,7 +58,7 @@ class Board:
             y_cord = int(hints[i][1])
             self.board[x_cord][y_cord] = hints[i][2]
             if (hints[i][2] == 'C'):
-                circle_water(self, hints[i][0], hints[i][1])
+                circle_water(self, hints[i][0], hints[i][1], 1, "horizontal")
                 self.rows[x_cord] = int(self.rows[x_cord]) - 1
                 self.columns[y_cord] = int(self.columns[y_cord]) - 1
                 self.boats_1 += 1
@@ -75,7 +75,7 @@ class Board:
         self.hints_actions = check_hints_actions(self, self.hints)
             
 
-    #Prints the board
+    #Print the board
     def print(self):
         """Mostra o estado atual do tabuleiro."""
 
@@ -160,12 +160,6 @@ class Bimaru(Problem):
 
         actions_list = []
         
-        #fill rows or columns already completed
-        #for i in range(10):
-        #    if (state.board.rows[i] == 0 or state.board.columns[i] == 0):
-        #        actions_list.append(fill_water(state))
-        #        break
-        
         #Place a boat
         if (state.board.boats_4 < 1 or state.board.boats_3 < 2 or
         state.board.boats_2 < 3 or state.board.boats_1 < 4):
@@ -194,12 +188,7 @@ class Bimaru(Problem):
         
         for a in action:
             #Filled lines go with -1 so they don't be selected again
-            if (type(a) is list):
-                for i in range(len(a[0])):
-                    aux.board.rows[a[0][i]] = -1
-                for i in range(len(a[1])):
-                    aux.board.columns[a[1][i]] = -1
-            elif (a == "boat_4"):
+            if (a == "boat_4"):
                 aux.board.boats_4 += 1
             elif (a == "boat_3"):
                 aux.board.boats_3 += 1
@@ -212,6 +201,20 @@ class Bimaru(Problem):
                 aux.board.hints_actions_num -= 1
             else:
                 aux.board[a[0]][a[1]] = a[2]
+                if (a[2] == 'c'):
+                    circle_water(aux.board, a[0], a[1], 1, "horizontal")
+                elif (a[2] == 't' and len(action) == 5):
+                    circle_water(aux.board, a[0], a[1], 4, "vertical")
+                elif (a[2] == 't' and len(action) == 4):
+                    circle_water(aux.board, a[0], a[1], 3, "vertical")
+                elif (a[2] == 't' and len(action) == 3):
+                    circle_water(aux.board, a[0], a[1], 2, "vertical")
+                elif (a[2] == 'l' and len(action) == 5):
+                    circle_water(aux.board, a[0], a[1], 4, "horizontal")
+                elif (a[2] == 'l' and len(action) == 4):
+                    circle_water(aux.board, a[0], a[1], 3, "horizontal")
+                elif (a[2] == 'l' and len(action) == 3):
+                    circle_water(aux.board, a[0], a[1], 2, "horizontal")
                 if (a[2] == 't' or a[2] == 'm' or a[2] == 'b' or
                 a[2] == 'r' or a[2] == 'l' or a[2] == 'c'):
                     aux.board.rows[a[0]] -= 1
@@ -243,30 +246,6 @@ class Bimaru(Problem):
         """Função heuristica utilizada para a procura A*."""
         # TODO
         pass
-
-
-#Find completed rows and columns , and fill empty spaces with water 
-def fill_water(state: BimaruState):
-    
-    fill_list = []
-    aux_list = [[], []]
-
-    for i in range(10):
-        if (state.board.rows[i] == 0):
-            aux_list[0].append(i)
-            for j in range(10):
-                if (state.board[i][j] == None):
-                    fill_list.append((i, j, 'w'))
-    
-    for i in range(10):
-        if (state.board.columns[i] == 0):
-            aux_list[1].append(i)
-            for j in range(10):
-                if (state.board[j][i] == None):
-                    fill_list.append((j, i, 'w'))
-
-    fill_list.append(aux_list)
-    return fill_list
 
 
 #Find in the board a place to put a boat (starting with bigger ones)
@@ -322,27 +301,47 @@ def place_boat(state: BimaruState):
 
 
 #Circle the given boat with water
-def circle_water(board: Board, row, column):
+def circle_water(board: Board, row, column, size, direction):
 
     x_cord = int(row)
     y_cord = int(column)
-    
-    if (is_valid_position(x_cord-1,y_cord-1) and board[x_cord-1][y_cord-1] == None):
-        board[x_cord-1][y_cord-1] = 'w'
-    if (is_valid_position(x_cord-1,y_cord) and board[x_cord-1][y_cord] == None):
-        board[x_cord-1][y_cord] = 'w'
-    if (is_valid_position(x_cord-1,y_cord+1) and board[x_cord-1][y_cord+1] == None):
-        board[x_cord-1][y_cord+1] = 'w'
-    if (is_valid_position(x_cord,y_cord-1) and board[x_cord][y_cord-1] == None):
-        board[x_cord][y_cord-1] = 'w'
-    if (is_valid_position(x_cord,y_cord+1) and board[x_cord][y_cord+1] == None):
-        board[x_cord][y_cord+1] = 'w'
-    if (is_valid_position(x_cord+1,y_cord-1) and board[x_cord+1][y_cord-1] == None):
-        board[x_cord+1][y_cord-1] = 'w'
-    if (is_valid_position(x_cord+1,y_cord) and board[x_cord+1][y_cord] == None):
-        board[x_cord+1][y_cord] = 'w'
-    if (is_valid_position(x_cord+1,y_cord+1) and board[x_cord+1][y_cord+1] == None):
-        board[x_cord+1][y_cord+1] = 'w'
+
+    if (direction == "horizontal"):
+        if (is_valid_position(x_cord-1,y_cord-1) and board[x_cord-1][y_cord-1] == None):
+            board[x_cord-1][y_cord-1] = 'w'
+        if (is_valid_position(x_cord,y_cord-1) and board[x_cord][y_cord-1] == None):
+            board[x_cord][y_cord-1] = 'w'
+        if (is_valid_position(x_cord+1,y_cord-1) and board[x_cord+1][y_cord-1] == None):
+            board[x_cord+1][y_cord-1] = 'w'
+        if (is_valid_position(x_cord-1,y_cord+size) and board[x_cord-1][y_cord+size] == None):
+            board[x_cord-1][y_cord+size] = 'w'
+        if (is_valid_position(x_cord,y_cord+size) and board[x_cord][y_cord+size] == None):
+            board[x_cord][y_cord+size] = 'w'
+        if (is_valid_position(x_cord+1,y_cord+size) and board[x_cord+1][y_cord+size] == None):
+            board[x_cord+1][y_cord+size] = 'w'
+        for i in range(size):
+            if (is_valid_position(x_cord-1,y_cord+i) and board[x_cord-1][y_cord+i] == None):
+                board[x_cord-1][y_cord+i] = 'w'
+            if (is_valid_position(x_cord+1,y_cord+i) and board[x_cord+1][y_cord+i] == None):
+                board[x_cord+1][y_cord+i] = 'w'
+    else:
+        if (is_valid_position(x_cord-1,y_cord-1) and board[x_cord-1][y_cord-1] == None):
+            board[x_cord-1][y_cord-1] = 'w'
+        if (is_valid_position(x_cord-1,y_cord) and board[x_cord-1][y_cord] == None):
+            board[x_cord-1][y_cord] = 'w'
+        if (is_valid_position(x_cord-1,y_cord+1) and board[x_cord-1][y_cord+1] == None):
+            board[x_cord-1][y_cord+1] = 'w'
+        if (is_valid_position(x_cord+size,y_cord-1) and board[x_cord+size][y_cord-1] == None):
+            board[x_cord+size][y_cord-1] = 'w'
+        if (is_valid_position(x_cord+size,y_cord) and board[x_cord+size][y_cord] == None):
+            board[x_cord+size][y_cord] = 'w'
+        if (is_valid_position(x_cord+size,y_cord+1) and board[x_cord+size][y_cord+1] == None):
+            board[x_cord+size][y_cord+1] = 'w'
+        for i in range(size):
+            if (is_valid_position(x_cord+i,y_cord-1) and board[x_cord+i][y_cord-1] == None):
+                board[x_cord+i][y_cord-1] = 'w'
+            if (is_valid_position(x_cord+size,y_cord+1) and board[x_cord+i][y_cord+1] == None):
+                board[x_cord+i][y_cord+1] = 'w'
 
 
 def check_completed_boats(board: Board, hints: list):
