@@ -77,7 +77,6 @@ class Board:
 
     #Print the board
     def print(self):
-        """Mostra o estado atual do tabuleiro."""
 
         for i in range(len(self.rows)):
             for j in range(len(self.columns)):
@@ -155,8 +154,6 @@ class Bimaru(Problem):
 
     #Receives a state and return a list with possible actions that can be made
     def actions(self, state: BimaruState):
-        """Retorna uma lista de ações que podem ser executadas a
-        partir do estado passado como argumento."""
 
         actions_list = []
         
@@ -179,10 +176,6 @@ class Bimaru(Problem):
 
     #Receives a state and an action and return the state after aplying the action
     def result(self, state: BimaruState, action):
-        """Retorna o estado resultante de executar a 'action' sobre
-        'state' passado como argumento. A ação a executar deve ser uma
-        das presentes na lista obtida pela execução de
-        self.actions(state)."""
         
         aux = copy.deepcopy(state)
         
@@ -242,8 +235,8 @@ class Bimaru(Problem):
         return True
         
 
+    #Function used to A* search
     def h(self, node: Node):
-        """Função heuristica utilizada para a procura A*."""
         # TODO
         pass
 
