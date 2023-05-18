@@ -161,10 +161,10 @@ class Bimaru(Problem):
         actions_list = []
         
         #fill rows or columns already completed
-        for i in range(10):
-            if (state.board.rows[i] == 0 or state.board.columns[i] == 0):
-                actions_list.append(fill_water(state))
-                break
+        #for i in range(10):
+        #    if (state.board.rows[i] == 0 or state.board.columns[i] == 0):
+        #        actions_list.append(fill_water(state))
+        #        break
         
         #Place a boat
         if (state.board.boats_4 < 1 or state.board.boats_3 < 2 or
