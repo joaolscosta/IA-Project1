@@ -7,6 +7,7 @@
 # 102078 João Costa
 
 import sys, copy
+import numpy as np
 from sys import stdin
 
 from search import (
@@ -41,7 +42,7 @@ class Board:
         self.rows.pop(0)
         self.columns.pop(0)
         self.hints = []
-        self.board = [[None for j in range(len(rows))] for i in range(len(columns))]
+        self.board = np.array([[None for j in range(len(rows))] for i in range(len(columns))])
         self.boats_4 = 0
         self.boats_3 = 0
         self.boats_2 = 0
@@ -73,6 +74,7 @@ class Board:
         
         check_completed_boats(self, self.hints)
         self.hints_actions = check_hints_actions(self, self.hints)
+
             
 
     #Print the board
@@ -164,7 +166,8 @@ class Bimaru(Problem):
                 actions_list.append(x)
 
         #Reevaluate hints actions list
-        state.board.hints_actions = check_hints_actions(state.board, state.board.hints)
+        if (board.hints_actions_num > 0):
+            state.board.hints_actions = check_hints_actions(state.board, state.board.hints)
 
         for x in state.board.hints_actions:
             if (len(x) > 0):
@@ -176,7 +179,7 @@ class Bimaru(Problem):
 
     #Receives a state and an action and return the state after aplying the action
     def result(self, state: BimaruState, action):
-        
+
         aux = copy.deepcopy(state)
         
         for a in action:
@@ -208,8 +211,7 @@ class Bimaru(Problem):
                     circle_water(aux.board, a[0], a[1], 3, "horizontal")
                 elif (a[2] == 'l' and len(action) == 3):
                     circle_water(aux.board, a[0], a[1], 2, "horizontal")
-                if (a[2] == 't' or a[2] == 'm' or a[2] == 'b' or
-                a[2] == 'r' or a[2] == 'l' or a[2] == 'c'):
+                if (a[2] != 'w' and a[2] != None):
                     aux.board.rows[a[0]] -= 1
                     aux.board.columns[a[1]] -= 1
 
@@ -237,14 +239,13 @@ class Bimaru(Problem):
 
     #Function used to A* search
     def h(self, node: Node):
-        # TODO
         pass
 
 
 #Find in the board a place to put a boat (starting with bigger ones)
 def place_boat(state: BimaruState):
     
-    action_list =[]
+    action_list = []
 
     #Try to place the bigger boats first
     if (state.board.boats_4 < 1):
@@ -429,9 +430,6 @@ def check_completed_boats(board: Board, hints: list):
 
 #Check what actions can be made from the given hints
 def check_hints_actions(board: Board, hints: list):
-    
-    if (board.hints_actions_num <= 0):
-        return []
 
     hints_action = [[] for i in range(board.hints_actions_num)]
     hints_counter = 0
