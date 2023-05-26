@@ -374,8 +374,6 @@ def check_exact_boats(board: Board):
                         circle_water(board, i, j, 2, "vertical")
                         if (size == 0):
                             return
-                        if (size == 0):
-                            return
 
 
 #Find in the board a place to put a boat (starting with bigger ones)
