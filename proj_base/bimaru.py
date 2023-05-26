@@ -195,6 +195,8 @@ class Bimaru(Problem):
             elif (type(a) is tuple and a[0] == "hint"):
                 aux.board.hints.remove(a[1])
                 aux.board.hints_actions_num -= 1
+                if (a[2] > 0):
+                    circle_water(aux.board, int(a[1][0]), int(a[1][1]), a[2], a[3])
             else:
                 aux.board[a[0]][a[1]] = a[2]
                 if (a[2] == 'c'):
@@ -252,46 +254,64 @@ def place_boat(state: BimaruState):
         for i in range(10):
             if (state.board.rows[i] >= 4):
                 for j in range(7):
-                        if (can_place_boat(state.board, i, j, 4, "horizontal")):
+                        if (aux(state.board, i, j, 4, "horizontal")):
                             action_list.append(["boat_4", (i, j, 'l'), (i, j+1, 'm'), (i, j+2, 'm'), (i, j+3, 'r')])
             if (state.board.columns[i] >= 4):
                 for j in range(7):
                         #Check there is no boat around the possible position
-                        if (can_place_boat(state.board, j, i, 4, "vertical")):
+                        if (aux(state.board, j, i, 4, "vertical")):
                             action_list.append(["boat_4", (j, i, 't'), (j+1, i, 'm'), (j+2, i, 'm'), (j+3, i, 'b')])
     
     elif (state.board.boats_3 < 2):
         for i in range(10):
             if (state.board.rows[i] >= 3):
                 for j in range(8):
-                        if (can_place_boat(state.board, i, j, 3, "horizontal")):
+                        if (aux(state.board, i, j, 3, "horizontal")):
                             action_list.append(["boat_3", (i, j, 'l'), (i, j+1, 'm'), (i, j+2, 'r')])
             if (state.board.columns[i] >= 3):
                 for j in range(8):
                         #Check there is no boat around the possible position
-                        if (can_place_boat(state.board, j, i, 3, "vertical")):
+                        if (aux(state.board, j, i, 3, "vertical")):
                             action_list.append(["boat_3", (j, i, 't'), (j+1, i, 'm'), (j+2, i, 'b')])
     
     elif (state.board.boats_2 < 3):
         for i in range(10):
             if (state.board.rows[i] >= 2):
                 for j in range(9):
-                        if (can_place_boat(state.board, i, j, 2, "horizontal")):
+                        if (aux(state.board, i, j, 2, "horizontal")):
                             action_list.append(["boat_2", (i, j, 'l'), (i, j+1, 'r')])
             if (state.board.columns[i] >= 2):
                 for j in range(9):
                         #Check there is no boat around the possible position
-                        if (can_place_boat(state.board, j, i, 2, "vertical")):
+                        if (aux(state.board, j, i, 2, "vertical")):
                             action_list.append(["boat_2", (j, i, 't'), (j+1, i, 'b')])
     
     elif (state.board.boats_1 < 4):
         for i in range(10):
             if (state.board.rows[i] >= 1):
                 for j in range(10):
-                        if (can_place_boat(state.board, i, j, 1, "horizontal")):
+                        if (aux(state.board, i, j, 1, "horizontal")):
                             action_list.append(["boat_1", (i, j, 'c')])
 
     return action_list
+
+def aux(board: Board, row, column, size, direction):
+
+    if (direction == 'horizontal'):
+        for i in range(size):
+            if (board[row][column+i] != None):
+                return False
+            if (board.columns[column+i] < 1):
+                return False
+
+    else:
+        for i in range(size):
+            if (board[row+i][column] != None):
+                return False
+            if (board.rows[row+i] < 1):
+                return False
+
+    return True
 
 
 #Circle the given boat with water
@@ -444,35 +464,35 @@ def check_hints_actions(board: Board, hints: list):
             if (is_valid_position(x_cord+2, y_cord) and board[x_cord + 2][y_cord] == 'B'):
                 x_cord_str = str(x_cord+2)
                 y_cord_str = str(y_cord)
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])),
-                ("hint", (x_cord_str, y_cord_str, 'B')), "boat_3",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 3, "vertical"),
+                ("hint", (x_cord_str, y_cord_str, 'B'), 0, ""), "boat_3",
                 (x_cord+1, y_cord, 'm')])
             if (is_valid_position(x_cord+3, y_cord) and board[x_cord + 3][y_cord] == 'B'):
                 x_cord_str = str(x_cord+3)
                 y_cord_str = str(y_cord)
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])),
-                ("hint", (x_cord_str, y_cord_str, 'B')), "boat_4",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 4, "vertical"),
+                ("hint", (x_cord_str, y_cord_str, 'B'), 0, ""), "boat_4",
                 (x_cord+1, y_cord, 'm'), (x_cord+2, y_cord, 'm')])
             if (can_place_boat(board, x_cord, y_cord, 2, "vertical")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_2",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 2, "vertical"), "boat_2",
                 (x_cord+1, y_cord, 'b')])
             if (can_place_boat(board, x_cord, y_cord, 3, "vertical")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_3",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 3, "vertical"), "boat_3",
                 (x_cord+1, y_cord, 'm'), (x_cord+2, y_cord, 'b')])
             if (can_place_boat(board, x_cord, y_cord, 4, "vertical")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_4",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 4, "vertical"), "boat_4",
                 (x_cord+1, y_cord, 'm'), (x_cord+2, y_cord, 'm'), (x_cord+3, y_cord, 'b')])
             hints_counter += 1
 
         elif (x[2] == 'B'):
             if (can_place_boat(board, x_cord-1, y_cord, 2, "vertical")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_2",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_2",
                 (x_cord-1, y_cord, 't')])
             if (can_place_boat(board, x_cord-2, y_cord, 3, "vertical")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_3",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_3",
                 (x_cord-1, y_cord, 'm'), (x_cord-2, y_cord, 't')])
             if (can_place_boat(board, x_cord-3, y_cord, 4, "vertical")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_4",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_4",
                 (x_cord-1, y_cord, 'm'),  (x_cord-2, y_cord, 'm'), (x_cord-3, y_cord, 't')])
             hints_counter += 1
 
@@ -480,56 +500,56 @@ def check_hints_actions(board: Board, hints: list):
             if (is_valid_position(x_cord, y_cord+2) and board[x_cord][y_cord + 2] == 'R'):
                 x_cord_str = str(x_cord)
                 y_cord_str = str(y_cord+2)
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])),
-                ("hint", (x_cord_str, y_cord_str, 'R')), "boat_3",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 3, "horizontal"),
+                ("hint", (x_cord_str, y_cord_str, 'R'), 0, ""), "boat_3",
                 (x_cord, y_cord+1, 'm')])
             if (is_valid_position(x_cord, y_cord+3) and board[x_cord][y_cord + 3] == 'R'):
                 x_cord_str = str(x_cord)
                 y_cord_str = str(y_cord+3)
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])),
-                ("hint", (x_cord_str, y_cord_str, 'R')), "boat_4",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 4, "horizontal"),
+                ("hint", (x_cord_str, y_cord_str, 'R'), 0, ""), "boat_4",
                 (x_cord, y_cord+1, 'm'), (x_cord, y_cord+2, 'm')])
             if (can_place_boat(board, x_cord, y_cord, 2, "horizontal")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_2",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 2, "horizontal"), "boat_2",
                 (x_cord, y_cord+1, 'r')])
             if (can_place_boat(board, x_cord, y_cord, 3, "horizontal")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_3",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 3, "horizontal"), "boat_3",
                 (x_cord, y_cord+1, 'm'), (x_cord, y_cord+2, 'r')])
             if (can_place_boat(board, x_cord, y_cord, 4, "horizontal")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_4",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 4, "horizontal"), "boat_4",
                 (x_cord, y_cord+1, 'm'), (x_cord, y_cord+2, 'm'), (x_cord, y_cord+3, 'r')])
             hints_counter += 1
 
         elif (x[2] == 'R'):
             if (can_place_boat(board, x_cord, y_cord-1, 2, "horizontal")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_2",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_2",
                 (x_cord, y_cord-1, 'l')])
             if (can_place_boat(board, x_cord, y_cord-2, 3, "horizontal")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_3",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_3",
                 (x_cord, y_cord-1, 'm'), (x_cord, y_cord-2, 'l')])
             if (can_place_boat(board, x_cord, y_cord-3, 4, "horizontal")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_4",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_4",
                 (x_cord, y_cord-1, 'm'), (x_cord, y_cord-2, 'm'), (x_cord, y_cord-3, 'l')])
             hints_counter += 1
 
         elif (x[2] == 'M'):
             if (can_place_boat(board, x_cord-1, y_cord, 3, "vertical")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_3",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_3",
                 (x_cord-1, y_cord, 't'), (x_cord+1, y_cord, 'b')])
             if (can_place_boat(board, x_cord-2, y_cord, 4, "vertical")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_4",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_4",
                 (x_cord-2, y_cord, 't'),  (x_cord-1, y_cord, 'm'), (x_cord+1, y_cord, 'b')])
             if (can_place_boat(board, x_cord-1, y_cord, 4, "vertical")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_4",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_4",
                 (x_cord-1, y_cord, 't'),  (x_cord+1, y_cord, 'm'), (x_cord+2, y_cord, 'b')])
             if (can_place_boat(board, x_cord, y_cord-1, 3, "horizontal")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_3",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_3",
                 (x_cord, y_cord-1, 'l'), (x_cord, y_cord+1, 'r')])
             if (can_place_boat(board, x_cord, y_cord-2, 4, "horizontal")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_4",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_4",
                 (x_cord, y_cord-2, 'l'), (x_cord, y_cord-1, 'm'), (x_cord, y_cord+1, 'r')])
             if (can_place_boat(board, x_cord, y_cord-1, 4, "horizontal")):
-                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2])), "boat_4",
+                hints_action[hints_counter].append([("hint", (x[0], x[1], x[2]), 0, ""), "boat_4",
                 (x_cord, y_cord-1, 'l'), (x_cord, y_cord+1, 'm'), (x_cord, y_cord+2, 'r')])
             hints_counter += 1
 
