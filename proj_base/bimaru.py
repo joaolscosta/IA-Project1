@@ -333,7 +333,7 @@ def check_exact_boats(board: Board):
                         else:
                             circle_water(board, i, j, 1, "horizontal")
                         if (size == 0):
-                            return aux
+                            return can_place_boat
 
         if (board.columns[i] != 0 and board.columns[i] == board.empty_column_space[i]):
             size = board.columns[i]
@@ -407,10 +407,11 @@ def check_exact_boats(board: Board):
 #This function fills every cell. usefull you don't want a state to proceed with tests
 def fill_everything(board: Board):
 
-    for i in range(10):
-        for j in range(10):
-            if (board[i][j] == None):
-                board[i][j] = 'p'
+    board.boats_4 = 2
+    board.boats_3 = 3
+    board.boats_2 = 4
+    board.boats_1 = 5
+
 
 
 #Find in the board a place to put a boat (starting with bigger ones)
@@ -470,6 +471,8 @@ def aux(board: Board, row, column, size, direction):
 
     if (direction == 'horizontal'):
         for i in range(size):
+            if (is_valid_position(row, column+i) == False):
+                return False
             if (board[row][column+i] != None):
                 return False
             if (board.columns[column+i] < 1):
@@ -477,6 +480,8 @@ def aux(board: Board, row, column, size, direction):
 
     else:
         for i in range(size):
+            if (is_valid_position(row+i, column) == False):
+                return False
             if (board[row+i][column] != None):
                 return False
             if (board.rows[row+i] < 1):
