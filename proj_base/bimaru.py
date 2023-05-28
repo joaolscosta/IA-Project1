@@ -205,6 +205,10 @@ class Bimaru(Problem):
                     circle_water(aux.board, int(a[1][0]), int(a[1][1]), a[2], a[3])
             else:
                 aux.board[a[0]][a[1]] = a[2]
+                aux.board.rows[a[0]] -= 1
+                aux.board.columns[a[1]] -= 1
+                aux.board.empty_row_space[a[0]] -= 1
+                aux.board.empty_column_space[a[1]] -= 1
                 if (a[2] == 'c'):
                     circle_water(aux.board, a[0], a[1], 1, "horizontal")
                 elif (a[2] == 't' and len(action) == 5):
@@ -219,11 +223,7 @@ class Bimaru(Problem):
                     circle_water(aux.board, a[0], a[1], 3, "horizontal")
                 elif (a[2] == 'l' and len(action) == 3):
                     circle_water(aux.board, a[0], a[1], 2, "horizontal")
-                if (a[2] != 'w' and a[2] != None):
-                    aux.board.rows[a[0]] -= 1
-                    aux.board.columns[a[1]] -= 1
-                    aux.board.empty_row_space[a[0]] -= 1
-                    aux.board.empty_column_space[a[1]] -= 1
+                    
         
         check_exact_boats(aux.board)
         return BimaruState(aux.board)
@@ -251,6 +251,8 @@ class Bimaru(Problem):
 #Check if in a row or column the spaces left are boats
 def check_exact_boats(board: Board):
 
+    aux = []
+
     for i in range(10):
         if (board.rows[i] != 0 and board.rows[i] == board.empty_row_space[i]):
             size = board.rows[i]
@@ -273,7 +275,10 @@ def check_exact_boats(board: Board):
                         board.empty_column_space[j+2] -= 1
                         board.empty_column_space[j+3] -= 1
                         board.boats_4 += 1
-                        circle_water(board, i, j, 4, "horizontal")
+                        if (board.boats_4 >= 2):
+                            fill_everything(board)
+                        else:
+                            circle_water(board, i, j, 4, "horizontal")
                         if (size == 0):
                             return
                     elif(size >= 3 and can_place_boat(board, i, j, 3, "horizontal")):
@@ -290,7 +295,10 @@ def check_exact_boats(board: Board):
                         board.empty_column_space[j+1] -= 1
                         board.empty_column_space[j+2] -= 1
                         board.boats_3 += 1
-                        circle_water(board, i, j, 3, "horizontal")
+                        if (board.boats_3 >= 3):
+                            fill_everything(board)
+                        else:
+                            circle_water(board, i, j, 3, "horizontal")
                         if (size == 0):
                             return
                     elif(size >= 2 and can_place_boat(board, i, j, 2, "horizontal")):
@@ -304,7 +312,10 @@ def check_exact_boats(board: Board):
                         board.empty_column_space[j] -= 1
                         board.empty_column_space[j+1] -= 1
                         board.boats_2 += 1
-                        circle_water(board, i, j, 2, "horizontal")
+                        if (board.boats_2 >= 4):
+                            fill_everything(board)
+                        else:
+                            circle_water(board, i, j, 2, "horizontal")
                         if (size == 0):
                             return
                     elif(size >= 1 and can_place_boat(board, i, j, 1, "horizontal")):
@@ -315,9 +326,13 @@ def check_exact_boats(board: Board):
                         board.empty_row_space[i] -= 1
                         board.empty_column_space[j] -= 1
                         board.boats_1 += 1
-                        circle_water(board, i, j, 1, "horizontal")
+                        aux.append((i,j))
+                        if (board.boats_1 >= 5):
+                            fill_everything(board)
+                        else:
+                            circle_water(board, i, j, 1, "horizontal")
                         if (size == 0):
-                            return
+                            return aux
 
         if (board.columns[i] != 0 and board.columns[i] == board.empty_column_space[i]):
             size = board.columns[i]
@@ -340,7 +355,10 @@ def check_exact_boats(board: Board):
                         board.empty_row_space[j+2] -= 1
                         board.empty_row_space[j+3] -= 1
                         board.boats_4 += 1
-                        circle_water(board, i, j, 4, "vertical")
+                        if (board.boats_4 >= 2):
+                            fill_everything(board)
+                        else:
+                            circle_water(board, i, j, 4, "vertical")
                         if (size == 0):
                             return
                     elif (size >= 3 and can_place_boat(board, j, i, 3, "vertical")):
@@ -357,10 +375,14 @@ def check_exact_boats(board: Board):
                         board.empty_row_space[j+1] -= 1
                         board.empty_row_space[j+2] -= 1
                         board.boats_3 += 1
-                        circle_water(board, i, j, 3, "vertical")
+                        if (board.boats_3 >= 3):
+                            fill_everything(board)
+                        else:
+                            circle_water(board, i, j, 3, "vertical")
                         if (size == 0):
                             return
                     elif (size >= 2 and can_place_boat(board, j, i, 2, "vertical")):
+                        
                         board[j][i] = 't'
                         board[j+1][i] = 'b'
                         size -= 2
@@ -371,9 +393,26 @@ def check_exact_boats(board: Board):
                         board.empty_row_space[j] -= 1
                         board.empty_row_space[j+1] -= 1
                         board.boats_2 += 1
-                        circle_water(board, i, j, 2, "vertical")
+                        if (board.boats_2 >= 4):
+                            fill_everything(board)
+                        else:
+                            circle_water(board, i, j, 2, "vertical")
                         if (size == 0):
                             return
+
+
+#This function fills every cell. usefull you don't want a state to proceed with tests
+def fill_everything(board: Board):
+
+    print("AQUI")
+    for i in range(10):
+        for j in range(10):
+            if (board[i][j] == None):
+                board[i][j] = 'p'
+                board.rows[i] -= 1
+                board.columns[j] -= 1
+
+    board.print()
 
 
 #Find in the board a place to put a boat (starting with bigger ones)
