@@ -43,6 +43,7 @@ class Board:
         self.empty_column_space = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
         self.rows.pop(0)
         self.columns.pop(0)
+        self.hints_num = len(hints)
         self.hints = []
         self.board = np.array([[None for j in range(len(rows))] for i in range(len(columns))])
         self.boats_4 = 0
@@ -223,8 +224,9 @@ class Bimaru(Problem):
                     circle_water(aux.board, a[0], a[1], 3, "horizontal")
                 elif (a[2] == 'l' and len(action) == 3):
                     circle_water(aux.board, a[0], a[1], 2, "horizontal")
-                    
-        
+
+        #print(action)          
+        #aux.board.print()
         check_exact_boats(aux.board)
         return BimaruState(aux.board)
 
@@ -251,9 +253,9 @@ class Bimaru(Problem):
 #Check if in a row or column the spaces left are boats
 def check_exact_boats(board: Board):
 
-    aux = []
-
+    size = 0
     for i in range(10):
+
         if (board.rows[i] != 0 and board.rows[i] == board.empty_row_space[i]):
             size = board.rows[i]
             for j in range(10):
@@ -326,7 +328,6 @@ def check_exact_boats(board: Board):
                         board.empty_row_space[i] -= 1
                         board.empty_column_space[j] -= 1
                         board.boats_1 += 1
-                        aux.append((i,j))
                         if (board.boats_1 >= 5):
                             fill_everything(board)
                         else:
@@ -382,7 +383,6 @@ def check_exact_boats(board: Board):
                         if (size == 0):
                             return
                     elif (size >= 2 and can_place_boat(board, j, i, 2, "vertical")):
-                        
                         board[j][i] = 't'
                         board[j+1][i] = 'b'
                         size -= 2
@@ -400,19 +400,17 @@ def check_exact_boats(board: Board):
                         if (size == 0):
                             return
 
+    if (size > 0 and board.hints_num == 0):
+        fill_everything(board)
+
 
 #This function fills every cell. usefull you don't want a state to proceed with tests
 def fill_everything(board: Board):
 
-    print("AQUI")
     for i in range(10):
         for j in range(10):
             if (board[i][j] == None):
                 board[i][j] = 'p'
-                board.rows[i] -= 1
-                board.columns[j] -= 1
-
-    board.print()
 
 
 #Find in the board a place to put a boat (starting with bigger ones)
