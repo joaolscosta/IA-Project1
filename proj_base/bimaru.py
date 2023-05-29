@@ -183,7 +183,6 @@ class Bimaru(Problem):
         if (state.board.hints_actions_num <= 0):
             exact_actions = check_exact_boats(state.board)
             if (len(exact_actions) > 0):
-                print(exact_actions, "aqui")
                 return exact_actions
 
         #Place a boat
@@ -202,8 +201,6 @@ class Bimaru(Problem):
             if (len(x) > 0):
                 for k in x:
                     actions_list.append(k)
-        
-        print(actions_list)
 
         return actions_list
 
@@ -249,8 +246,6 @@ class Bimaru(Problem):
                 elif (a[2] == 'l' and len(action) == 3):
                     circle_water(aux.board, a[0], a[1], 2, "horizontal")
 
-        print(action)
-        aux.board.print()
         return BimaruState(aux.board)
 
 
