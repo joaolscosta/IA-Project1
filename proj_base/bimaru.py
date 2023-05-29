@@ -190,9 +190,10 @@ class Bimaru(Problem):
         if (state.board.valid_path == False):
             return []
 
-        exact_actions = check_exact_boats(state.board)
-        if (len(exact_actions) > 0):
-            return exact_actions
+        if (state.board.hints_actions_num <= 0):
+            exact_actions = check_exact_boats(state.board)
+            if (len(exact_actions) > 0):
+                return exact_actions
 
         #Place a boat
         if (state.board.boats_4 < 1 or state.board.boats_3 < 2 or
