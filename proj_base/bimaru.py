@@ -105,6 +105,16 @@ class Board:
                 else:    
                     print(self.board[i][j], end="")
             print('\n', end="")
+    
+    def print_water(self):
+
+        for i in range(len(self.rows)):
+            for j in range(len(self.columns)):
+                if (self.board[i][j] == None):
+                    print('.', end="")
+                else:    
+                    print(self.board[i][j], end="")
+            print('\n', end="")
 
 
     def __getitem__(self, item):
@@ -185,11 +195,11 @@ class Bimaru(Problem):
             if (len(exact_actions) > 0):
                 return exact_actions
 
-        #Place a boat
-        if (state.board.boats_4 < 1 or state.board.boats_3 < 2 or
-        state.board.boats_2 < 3 or state.board.boats_1 < 4):
-            for x in place_boat(state):
-                actions_list.append(x)
+            #Place a boat
+            if (state.board.boats_4 < 1 or state.board.boats_3 < 2 or
+            state.board.boats_2 < 3 or state.board.boats_1 < 4):
+                for x in place_boat(state):
+                    actions_list.append(x)
 
         #Reevaluate hints actions list
         if (state.board.hints_actions_num > 0):
@@ -201,6 +211,8 @@ class Bimaru(Problem):
             if (len(x) > 0):
                 for k in x:
                     actions_list.append(k)
+        
+        #print(actions_list)
 
         return actions_list
 
@@ -229,6 +241,10 @@ class Bimaru(Problem):
                 aux.board[a[0]][a[1]] = a[2]
                 aux.board.rows[a[0]] -= 1
                 aux.board.columns[a[1]] -= 1
+                if (aux.board.rows[a[0]] == 0):
+                    fill_water(aux.board, a[0], "horizontal")
+                if (aux.board.columns[a[1]] == 0):
+                    fill_water(aux.board, a[1], "vertical")
                 aux.board.empty_row_space[a[0]] -= 1
                 aux.board.empty_column_space[a[1]] -= 1
                 if (a[2] == 'c'):
@@ -246,6 +262,8 @@ class Bimaru(Problem):
                 elif (a[2] == 'l' and len(action) == 3):
                     circle_water(aux.board, a[0], a[1], 2, "horizontal")
 
+        #print(action)
+        #aux.board.print_water()
         return BimaruState(aux.board)
 
 
@@ -284,17 +302,17 @@ def check_exact_boats(board: Board):
                         size -= 4
                         if (size == 0):
                             return actions
-                    elif(size >= 3 and can_place_boat(board, i, j, 3, "horizontal")):
+                    elif(size >= 3 and board.boats_4 == 1 and can_place_boat(board, i, j, 3, "horizontal")):
                         actions.append(["boat_3", (i, j, 'l'), (i, j+1, 'm'), (i, j+2, 'r')])
                         size -= 3
                         if (size == 0):
                             return actions
-                    elif(size >= 2 and can_place_boat(board, i, j, 2, "horizontal")):
+                    elif(size >= 2 and board.boats_4 == 1 and board.boats_3 == 2 and can_place_boat(board, i, j, 2, "horizontal")):
                         actions.append(["boat_2", (i, j, 'l'), (i, j+1, 'r')])
                         size -= 2
                         if (size == 0):
                             return actions
-                    elif(size >= 1 and can_place_boat(board, i, j, 1, "horizontal")):
+                    elif(size >= 1 and board.boats_4 == 1 and board.boats_3 == 2 and board.boats_2 == 3 and board.boats_1 < 4 and can_place_boat(board, i, j, 1, "horizontal")):
                         actions.append(["boat_1", (i, j, 'c')])
                         size -= 1
                         if (size == 0):
@@ -309,17 +327,17 @@ def check_exact_boats(board: Board):
                         size -= 4
                         if (size == 0):
                             return actions
-                    elif (size >= 3 and can_place_boat(board, j, i, 3, "vertical")):
+                    elif (size >= 3 and board.boats_4 == 1 and can_place_boat(board, j, i, 3, "vertical")):
                         actions.append(["boat_3", (j, i, 't'), (j+1, i, 'm'), (j+2, i, 'b')])
                         size -= 3
                         if (size == 0):
                             return actions
-                    elif (size >= 2 and can_place_boat(board, j, i, 2, "vertical")):
+                    elif (size >= 2 and board.boats_4 == 1 and board.boats_3 == 2 and can_place_boat(board, j, i, 2, "vertical")):
                         actions.append(["boat_2", (j, i, 't'), (j+1, i, 'b')])
                         size -= 2
                         if (size == 0):
                             return actions
-                    elif (size >= 1 and can_place_boat(board, j, i, 1, "vertical")):
+                    elif (size >= 1 and board.boats_4 == 1 and board.boats_3 == 2 and board.boats_2 == 3 and can_place_boat(board, j, i, 1, "vertical")):
                         actions.append(["boat_1", (j, i, 'c')])
                         size -= 1
                         if (size == 0):
