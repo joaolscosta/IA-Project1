@@ -190,7 +190,7 @@ class Bimaru(Problem):
         if (state.board.valid_path == False):
             return []
 
-        if (state.board.hints_actions_num <= 0):
+        if (state.board.hints_num == 0):
             exact_actions = check_exact_boats(state.board)
             if (len(exact_actions) > 0):
                 return exact_actions
@@ -291,8 +291,8 @@ def check_exact_boats(board: Board):
 
     size = 0
     actions = []
-    for i in range(10):
 
+    for i in range(10):
         if (board.rows[i] != 0 and board.rows[i] == board.empty_row_space[i]):
             size = board.rows[i]
             for j in range(10):
