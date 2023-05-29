@@ -190,16 +190,15 @@ class Bimaru(Problem):
         if (state.board.valid_path == False):
             return []
 
-        if (state.board.hints_actions_num <= 0):
-            exact_actions = check_exact_boats(state.board)
-            if (len(exact_actions) > 0):
-                return exact_actions
+        exact_actions = check_exact_boats(state.board)
+        if (len(exact_actions) > 0):
+            return exact_actions
 
-            #Place a boat
-            if (state.board.boats_4 < 1 or state.board.boats_3 < 2 or
-            state.board.boats_2 < 3 or state.board.boats_1 < 4):
-                for x in place_boat(state):
-                    actions_list.append(x)
+        #Place a boat
+        if (state.board.boats_4 < 1 or state.board.boats_3 < 2 or
+        state.board.boats_2 < 3 or state.board.boats_1 < 4):
+            for x in place_boat(state):
+                actions_list.append(x)
 
         #Reevaluate hints actions list
         if (state.board.hints_actions_num > 0):
@@ -299,24 +298,34 @@ def check_exact_boats(board: Board):
                 if (board[i][j] == None):
                     if (size >= 4 and can_place_boat(board, i, j, 4, "horizontal")):
                         actions.append(["boat_4", (i, j, 'l'), (i, j+1, 'm'), (i, j+2, 'm'), (i, j+3, 'r')])
-                        size -= 4
-                        if (size == 0):
-                            return actions
-                    elif(size >= 3 and board.boats_4 == 1 and can_place_boat(board, i, j, 3, "horizontal")):
+                        return actions
+                    elif(size >= 3 and can_place_boat(board, i, j, 3, "horizontal")):
                         actions.append(["boat_3", (i, j, 'l'), (i, j+1, 'm'), (i, j+2, 'r')])
-                        size -= 3
-                        if (size == 0):
-                            return actions
-                    elif(size >= 2 and board.boats_4 == 1 and board.boats_3 == 2 and can_place_boat(board, i, j, 2, "horizontal")):
+                        return actions
+                    elif(size >= 2 and can_place_boat(board, i, j, 2, "horizontal")):
                         actions.append(["boat_2", (i, j, 'l'), (i, j+1, 'r')])
-                        size -= 2
-                        if (size == 0):
-                            return actions
-                    elif(size >= 1 and board.boats_4 == 1 and board.boats_3 == 2 and board.boats_2 == 3 and board.boats_1 < 4 and can_place_boat(board, i, j, 1, "horizontal")):
+                        return actions
+                    elif(size >= 1 and board.boats_1 < 4 and can_place_boat(board, i, j, 1, "horizontal")):
+                        if (can_place_boat(board, i, j, 4, "vertical")):
+                            actions.append(["boat_4", (i, j, 't'), (i+1, j, 'm'), (i+2, j, 'm'), (i+3, j, 'b')])
+                        if (can_place_boat(board, i, j, 3, "vertical")):
+                            actions.append(["boat_3", (i, j, 't'), (i+1, j, 'm'), (i+2, j, 'b')])
+                        if (can_place_boat(board, i, j, 2, "vertical")):
+                            actions.append(["boat_2", (i, j, 't'), (i+1, j, 'b')])
+                        if (can_place_boat(board, i-1, j, 4, "vertical")):
+                            actions.append(["boat_4", (i-1, j, 't'), (i, j, 'm'), (i+1, j, 'm'), (i+2, j, 'b')])
+                        if (can_place_boat(board, i-1, j, 3, "vertical")):
+                            actions.append(["boat_3", (i-1, j, 't'), (i, j, 'm'), (i+1, j, 'b')])
+                        if (can_place_boat(board, i-1, j, 2, "vertical")):
+                            actions.append(["boat_2", (i-1, j, 't'), (i, j, 'b')])
+                        if (can_place_boat(board, i-2, j, 4, "vertical")):
+                            actions.append(["boat_4", (i-2, j, 't'), (i-1, j, 'm'), (i, j, 'm'), (i+1, j, 'b')])
+                        if (can_place_boat(board, i-2, j, 3, "vertical")):
+                            actions.append(["boat_3", (i-2, j, 't'), (i-1, j, 'm'), (i, j, 'b')])
+                        if (can_place_boat(board, i-3, j, 4, "vertical")):
+                            actions.append(["boat_4", (i-3, j, 't'), (i-2, j, 'm'), (i-1, j, 'm'), (i, j, 'b')])
                         actions.append(["boat_1", (i, j, 'c')])
-                        size -= 1
-                        if (size == 0):
-                            return actions
+                        return actions
 
         if (board.columns[i] != 0 and board.columns[i] == board.empty_column_space[i]):
             size = board.columns[i]
@@ -324,24 +333,34 @@ def check_exact_boats(board: Board):
                 if (board[j][i] == None):
                     if (size >= 4 and can_place_boat(board, j, i, 4, "vertical")):
                         actions.append(["boat_4", (j, i, 't'), (j+1, i, 'm'), (j+2, i, 'm'), (j+3, i, 'b')])
-                        size -= 4
-                        if (size == 0):
-                            return actions
-                    elif (size >= 3 and board.boats_4 == 1 and can_place_boat(board, j, i, 3, "vertical")):
+                        return actions
+                    elif (size >= 3 and can_place_boat(board, j, i, 3, "vertical")):
                         actions.append(["boat_3", (j, i, 't'), (j+1, i, 'm'), (j+2, i, 'b')])
-                        size -= 3
-                        if (size == 0):
-                            return actions
-                    elif (size >= 2 and board.boats_4 == 1 and board.boats_3 == 2 and can_place_boat(board, j, i, 2, "vertical")):
+                        return actions
+                    elif (size >= 2 and can_place_boat(board, j, i, 2, "vertical")):
                         actions.append(["boat_2", (j, i, 't'), (j+1, i, 'b')])
-                        size -= 2
-                        if (size == 0):
-                            return actions
-                    elif (size >= 1 and board.boats_4 == 1 and board.boats_3 == 2 and board.boats_2 == 3 and can_place_boat(board, j, i, 1, "vertical")):
+                        return actions
+                    elif (size >= 1 and can_place_boat(board, j, i, 1, "vertical")):
+                        if (can_place_boat(board, j, i, 4, "horizontal")):
+                            actions.append(["boat_4", (j, i, 'l'), (j, i+1, 'm'), (j, i+2, 'm'), (j, i+3, 'r')])
+                        if (can_place_boat(board, j, i, 3, "horizontal")):
+                            actions.append(["boat_3", (j, i, 'l'), (j, i+1, 'm'), (j, i+2, 'r')])
+                        if (can_place_boat(board, j, i, 2, "horizontal")):
+                            actions.append(["boat_2", (j, i, 'l'), (j, i+1, 'r')])
+                        if (can_place_boat(board, j, i-1, 4, "horizontal")):
+                            actions.append(["boat_4", (j, i-1, 'l'), (j, i, 'm'), (j, i+1, 'm'), (j, i+2, 'r')])
+                        if (can_place_boat(board, j, i-1, 3, "horizontal")):
+                            actions.append(["boat_3", (j, i-1, 'l'), (j, i, 'm'), (j, i+1, 'r')])
+                        if (can_place_boat(board, j, i-1, 2, "horizontal")):
+                            actions.append(["boat_2", (j, i-1, 'l'), (j, i, 'r')])
+                        if (can_place_boat(board, j, i-2, 4, "horizontal")):
+                            actions.append(["boat_4", (j, i-2, 'l'), (j, i-1, 'm'), (j, i, 'm'), (j, i+1, 'r')])
+                        if (can_place_boat(board, j, i-2, 3, "horizontal")):
+                            actions.append(["boat_3", (j, i-2, 'l'), (j, i-1, 'm'), (j, i, 'r')])
+                        if (can_place_boat(board, j, i-3, 4, "horizontal")):
+                            actions.append(["boat_4", (j, i-3, 'l'), (j, i-2, 'm'), (j, i-1, 'm'), (j, i, 'r')])
                         actions.append(["boat_1", (j, i, 'c')])
-                        size -= 1
-                        if (size == 0):
-                            return actions
+                        return actions
 
     return actions
 
@@ -396,69 +415,7 @@ def place_boat(state: BimaruState):
                             action_list.append(["boat_1", (i, j, 'c')])
 
     return action_list
-
-
-def water_around(board: Board, row, column, size, direction):
-    if (direction == "horizontal"):
-        if (is_valid_position(row-1,column-1)):
-            if (board[row-1][column-1] != 'w' and board[row-1][column-1] != 'W'):
-                return False
-        if (is_valid_position(row,column-1)):
-            if (board[row][column-1] != 'w' and board[row][column-1] != 'W'):
-                return False
-        if (is_valid_position(row+1,column-1)):
-            if (board[row+1][column-1] != 'w' and board[row+1][column-1] != 'W'):
-                return False
-        if (is_valid_position(row-1,column+size)):
-            if (board[row-1][column+size] != 'w' and board[row-1][column+size] != 'W'):
-                return False
-        if (is_valid_position(row,column+size)):
-            if (board[row][column+size] != 'w' and board[row][column+size] != 'W'):
-                return False
-        if (is_valid_position(row+1,column+size)):
-            if (board[row+1][column+size] != 'w' and board[row+1][column+size] != 'W'):
-                return False
-        for i in range(size):
-            if (is_valid_position(row-1,column+i)):
-                if (board[row-1][column+i] != 'w' and board[row-1][column+i] != 'W'):
-                    return False
-            if (is_valid_position(row+1,column+i)):
-                if (board[row+1][column+i] != 'w' and board[row+1][column+i] != 'W'):
-                    return False
-                
-    else:
-        if (is_valid_position(row-1,column-1)):
-            if (board[row-1][column-1] != 'w' and board[row-1][column-1] != 'W'):
-                return False
-            
-        if (is_valid_position(row-1,column)):
-            if (board[row-1][column] != 'w' and board[row-1][column] != 'W'):
-                return False
-        if (is_valid_position(row-1,column+1)):
-            if (board[row-1][column+1] != 'w' and board[row-1][column+1] != 'W'):
-                return False
-            
-        if (is_valid_position(row+size,column-1)):
-            if (board[row+size][column-1] != 'w' and board[row+size][column-1] != 'W'):
-                return False
-            
-        if (is_valid_position(row+size,column)):
-            if (board[row+size][column] != 'w' and board[row+size][column] != 'W'):
-                return False
-        if (is_valid_position(row+size,column+1)):
-            if (board[row+size][column+1] != 'w' and board[row+size][column+1] != 'W'):
-                return False
-            
-        for i in range(size):
-            if (is_valid_position(row+i,column-1)):
-                if (board[row+i][column-1] != 'w' and board[row+i][column-1] != 'W'):
-                    return False
-            
-            if (is_valid_position(row+size,column+1)):
-                if (board[row+i][column+1] != 'w' and board[row+i][column+1] != 'W'):
-                    return False
-                
-
+               
 
 #Check if a possible boat position is empty
 def aux(board: Board, row, column, size, direction):
@@ -629,7 +586,7 @@ def circle_water(board: Board, row, column, size, direction):
                     board[x_cord+i][y_cord-1] = 'w'
                     board.empty_row_space[x_cord+i] -= 1
                     board.empty_column_space[y_cord-1] -= 1
-            if (is_valid_position(x_cord+size,y_cord+1)):
+            if (is_valid_position(x_cord+i,y_cord+1)):
                 if (board[x_cord+i][y_cord+1] != None and board[x_cord+i][y_cord+1] != 'w' and
                 board[x_cord+i][y_cord+1] != 'W'):
                     board.valid_path = False
