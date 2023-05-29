@@ -43,14 +43,15 @@ class Board:
         self.empty_column_space = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
         self.rows.pop(0)
         self.columns.pop(0)
-        self.hints_num = len(hints)
+        self.hints_num = 0
         self.hints = []
+        self.hints_actions_num = 0
         self.board = np.array([[None for j in range(len(rows))] for i in range(len(columns))])
         self.boats_4 = 0
         self.boats_3 = 0
         self.boats_2 = 0
         self.boats_1 = 0
-        self.hints_actions_num = 0
+        self.valid_path = True
 
         for i in range(10):
             self.rows[i] = int(self.rows[i])
@@ -69,6 +70,10 @@ class Board:
                 self.empty_column_space[y_cord] -= 1
                 self.boats_1 += 1
 
+            elif (hints[i][2] == 'W'):
+                self.empty_row_space[x_cord] -= 1
+                self.empty_column_space[y_cord] -= 1
+
             elif (self.board[x_cord][y_cord] == 'T' or
             self.board[x_cord][y_cord] == 'M' or self.board[x_cord][y_cord] == 'B' or
             self.board[x_cord][y_cord] == 'R' or self.board[x_cord][y_cord] == 'L'):
@@ -77,10 +82,16 @@ class Board:
                 self.empty_row_space[x_cord] -= 1
                 self.empty_column_space[y_cord] -= 1
                 self.hints_actions_num += 1
+                self.hints_num += 1
                 self.hints.append((hints[i][0], hints[i][1], hints[i][2]))
         
         check_completed_boats(self, self.hints)
         self.hints_actions = check_hints_actions(self, self.hints)
+        for i in range(10):
+            if (self.rows[i] == 0):
+                fill_water(self, i, "horizontal")
+            if (self.columns[i] == 0):
+                fill_water(self, i, "vertical")
 
             
 
@@ -166,6 +177,15 @@ class Bimaru(Problem):
 
         actions_list = []
         
+        if (state.board.valid_path == False):
+            return []
+
+        if (state.board.hints_actions_num <= 0):
+            exact_actions = check_exact_boats(state.board)
+            if (len(exact_actions) > 0):
+                print(exact_actions, "aqui")
+                return exact_actions
+
         #Place a boat
         if (state.board.boats_4 < 1 or state.board.boats_3 < 2 or
         state.board.boats_2 < 3 or state.board.boats_1 < 4):
@@ -173,13 +193,17 @@ class Bimaru(Problem):
                 actions_list.append(x)
 
         #Reevaluate hints actions list
-        if (board.hints_actions_num > 0):
+        if (state.board.hints_actions_num > 0):
             state.board.hints_actions = check_hints_actions(state.board, state.board.hints)
+        else:
+            state.board.hints_actions = []
 
         for x in state.board.hints_actions:
             if (len(x) > 0):
                 for k in x:
                     actions_list.append(k)
+        
+        print(actions_list)
 
         return actions_list
 
@@ -225,9 +249,8 @@ class Bimaru(Problem):
                 elif (a[2] == 'l' and len(action) == 3):
                     circle_water(aux.board, a[0], a[1], 2, "horizontal")
 
-        #print(action)          
-        #aux.board.print()
-        check_exact_boats(aux.board)
+        print(action)
+        aux.board.print()
         return BimaruState(aux.board)
 
 
@@ -254,6 +277,7 @@ class Bimaru(Problem):
 def check_exact_boats(board: Board):
 
     size = 0
+    actions = []
     for i in range(10):
 
         if (board.rows[i] != 0 and board.rows[i] == board.empty_row_space[i]):
@@ -261,157 +285,52 @@ def check_exact_boats(board: Board):
             for j in range(10):
                 if (board[i][j] == None):
                     if (size >= 4 and can_place_boat(board, i, j, 4, "horizontal")):
-                        board[i][j] = 'l'
-                        board[i][j+1] = 'm'
-                        board[i][j+2] = 'm'
-                        board[i][j+3] = 'r'
+                        actions.append(["boat_4", (i, j, 'l'), (i, j+1, 'm'), (i, j+2, 'm'), (i, j+3, 'r')])
                         size -= 4
-                        board.rows[i] -= 4
-                        board.columns[j] -= 1
-                        board.columns[j+1] -= 1
-                        board.columns[j+2] -= 1
-                        board.columns[j+3] -= 1
-                        board.empty_row_space[i] -= 4
-                        board.empty_column_space[j] -= 1
-                        board.empty_column_space[j+1] -= 1
-                        board.empty_column_space[j+2] -= 1
-                        board.empty_column_space[j+3] -= 1
-                        board.boats_4 += 1
-                        if (board.boats_4 >= 2):
-                            fill_everything(board)
-                        else:
-                            circle_water(board, i, j, 4, "horizontal")
                         if (size == 0):
-                            return
+                            return actions
                     elif(size >= 3 and can_place_boat(board, i, j, 3, "horizontal")):
-                        board[i][j] = 'l'
-                        board[i][j+1] = 'm'
-                        board[i][j+2] = 'r'
+                        actions.append(["boat_3", (i, j, 'l'), (i, j+1, 'm'), (i, j+2, 'r')])
                         size -= 3
-                        board.rows[i] -= 3
-                        board.columns[j] -= 1
-                        board.columns[j+1] -= 1
-                        board.columns[j+2] -= 1
-                        board.empty_row_space[i] -= 3
-                        board.empty_column_space[j] -= 1
-                        board.empty_column_space[j+1] -= 1
-                        board.empty_column_space[j+2] -= 1
-                        board.boats_3 += 1
-                        if (board.boats_3 >= 3):
-                            fill_everything(board)
-                        else:
-                            circle_water(board, i, j, 3, "horizontal")
                         if (size == 0):
-                            return
+                            return actions
                     elif(size >= 2 and can_place_boat(board, i, j, 2, "horizontal")):
-                        board[i][j] = 'l'
-                        board[i][j+1] = 'r'
+                        actions.append(["boat_2", (i, j, 'l'), (i, j+1, 'r')])
                         size -= 2
-                        board.rows[i] -= 2
-                        board.columns[j] -= 1
-                        board.columns[j+1] -= 1
-                        board.empty_row_space[i] -= 2
-                        board.empty_column_space[j] -= 1
-                        board.empty_column_space[j+1] -= 1
-                        board.boats_2 += 1
-                        if (board.boats_2 >= 4):
-                            fill_everything(board)
-                        else:
-                            circle_water(board, i, j, 2, "horizontal")
                         if (size == 0):
-                            return
+                            return actions
                     elif(size >= 1 and can_place_boat(board, i, j, 1, "horizontal")):
-                        board[i][j] = 'c'
+                        actions.append(["boat_1", (i, j, 'c')])
                         size -= 1
-                        board.rows[i] -= 1
-                        board.columns[j] -= 1
-                        board.empty_row_space[i] -= 1
-                        board.empty_column_space[j] -= 1
-                        board.boats_1 += 1
-                        if (board.boats_1 >= 5):
-                            fill_everything(board)
-                        else:
-                            circle_water(board, i, j, 1, "horizontal")
                         if (size == 0):
-                            return can_place_boat
+                            return actions
 
         if (board.columns[i] != 0 and board.columns[i] == board.empty_column_space[i]):
             size = board.columns[i]
             for j in range(10):
                 if (board[j][i] == None):
                     if (size >= 4 and can_place_boat(board, j, i, 4, "vertical")):
-                        board[j][i] = 't'
-                        board[j+1][i] = 'm'
-                        board[j+2][i] = 'm'
-                        board[j+3][i] = 'b'
+                        actions.append(["boat_4", (j, i, 't'), (j+1, i, 'm'), (j+2, i, 'm'), (j+3, i, 'b')])
                         size -= 4
-                        board.columns[i] -= 4
-                        board.rows[j] -= 1
-                        board.rows[j+1] -= 1
-                        board.rows[j+2] -= 1
-                        board.rows[j+3] -= 1
-                        board.empty_column_space[i] -= 4
-                        board.empty_row_space[j] -= 1
-                        board.empty_row_space[j+1] -= 1
-                        board.empty_row_space[j+2] -= 1
-                        board.empty_row_space[j+3] -= 1
-                        board.boats_4 += 1
-                        if (board.boats_4 >= 2):
-                            fill_everything(board)
-                        else:
-                            circle_water(board, i, j, 4, "vertical")
                         if (size == 0):
-                            return
+                            return actions
                     elif (size >= 3 and can_place_boat(board, j, i, 3, "vertical")):
-                        board[j][i] = 't'
-                        board[j+1][i] = 'm'
-                        board[j+2][i] = 'b'
+                        actions.append(["boat_3", (j, i, 't'), (j+1, i, 'm'), (j+2, i, 'b')])
                         size -= 3
-                        board.columns[i] -= 3
-                        board.rows[j] -= 1
-                        board.rows[j+1] -= 1
-                        board.rows[j+2] -= 1
-                        board.empty_column_space[i] -= 3
-                        board.empty_row_space[j] -= 1
-                        board.empty_row_space[j+1] -= 1
-                        board.empty_row_space[j+2] -= 1
-                        board.boats_3 += 1
-                        if (board.boats_3 >= 3):
-                            fill_everything(board)
-                        else:
-                            circle_water(board, i, j, 3, "vertical")
                         if (size == 0):
-                            return
+                            return actions
                     elif (size >= 2 and can_place_boat(board, j, i, 2, "vertical")):
-                        board[j][i] = 't'
-                        board[j+1][i] = 'b'
+                        actions.append(["boat_2", (j, i, 't'), (j+1, i, 'b')])
                         size -= 2
-                        board.columns[i] -= 2
-                        board.rows[j] -= 1
-                        board.rows[j+1] -= 1
-                        board.empty_column_space[i] -= 2
-                        board.empty_row_space[j] -= 1
-                        board.empty_row_space[j+1] -= 1
-                        board.boats_2 += 1
-                        if (board.boats_2 >= 4):
-                            fill_everything(board)
-                        else:
-                            circle_water(board, i, j, 2, "vertical")
                         if (size == 0):
-                            return
+                            return actions
+                    elif (size >= 1 and can_place_boat(board, j, i, 1, "vertical")):
+                        actions.append(["boat_1", (j, i, 'c')])
+                        size -= 1
+                        if (size == 0):
+                            return actions
 
-    if (size > 0 and board.hints_num == 0):
-        fill_everything(board)
-
-
-#This function fills every cell. usefull you don't want a state to proceed with tests
-def fill_everything(board: Board):
-
-    board.boats_4 = 2
-    board.boats_3 = 3
-    board.boats_2 = 4
-    board.boats_1 = 5
-
+    return actions
 
 
 #Find in the board a place to put a boat (starting with bigger ones)
@@ -466,6 +385,68 @@ def place_boat(state: BimaruState):
     return action_list
 
 
+def water_around(board: Board, row, column, size, direction):
+    if (direction == "horizontal"):
+        if (is_valid_position(row-1,column-1)):
+            if (board[row-1][column-1] != 'w' and board[row-1][column-1] != 'W'):
+                return False
+        if (is_valid_position(row,column-1)):
+            if (board[row][column-1] != 'w' and board[row][column-1] != 'W'):
+                return False
+        if (is_valid_position(row+1,column-1)):
+            if (board[row+1][column-1] != 'w' and board[row+1][column-1] != 'W'):
+                return False
+        if (is_valid_position(row-1,column+size)):
+            if (board[row-1][column+size] != 'w' and board[row-1][column+size] != 'W'):
+                return False
+        if (is_valid_position(row,column+size)):
+            if (board[row][column+size] != 'w' and board[row][column+size] != 'W'):
+                return False
+        if (is_valid_position(row+1,column+size)):
+            if (board[row+1][column+size] != 'w' and board[row+1][column+size] != 'W'):
+                return False
+        for i in range(size):
+            if (is_valid_position(row-1,column+i)):
+                if (board[row-1][column+i] != 'w' and board[row-1][column+i] != 'W'):
+                    return False
+            if (is_valid_position(row+1,column+i)):
+                if (board[row+1][column+i] != 'w' and board[row+1][column+i] != 'W'):
+                    return False
+                
+    else:
+        if (is_valid_position(row-1,column-1)):
+            if (board[row-1][column-1] != 'w' and board[row-1][column-1] != 'W'):
+                return False
+            
+        if (is_valid_position(row-1,column)):
+            if (board[row-1][column] != 'w' and board[row-1][column] != 'W'):
+                return False
+        if (is_valid_position(row-1,column+1)):
+            if (board[row-1][column+1] != 'w' and board[row-1][column+1] != 'W'):
+                return False
+            
+        if (is_valid_position(row+size,column-1)):
+            if (board[row+size][column-1] != 'w' and board[row+size][column-1] != 'W'):
+                return False
+            
+        if (is_valid_position(row+size,column)):
+            if (board[row+size][column] != 'w' and board[row+size][column] != 'W'):
+                return False
+        if (is_valid_position(row+size,column+1)):
+            if (board[row+size][column+1] != 'w' and board[row+size][column+1] != 'W'):
+                return False
+            
+        for i in range(size):
+            if (is_valid_position(row+i,column-1)):
+                if (board[row+i][column-1] != 'w' and board[row+i][column-1] != 'W'):
+                    return False
+            
+            if (is_valid_position(row+size,column+1)):
+                if (board[row+i][column+1] != 'w' and board[row+i][column+1] != 'W'):
+                    return False
+                
+
+
 #Check if a possible boat position is empty
 def aux(board: Board, row, column, size, direction):
 
@@ -497,73 +478,171 @@ def circle_water(board: Board, row, column, size, direction):
     y_cord = int(column)
 
     if (direction == "horizontal"):
-        if (is_valid_position(x_cord-1,y_cord-1) and board[x_cord-1][y_cord-1] == None):
-            board[x_cord-1][y_cord-1] = 'w'
-            board.empty_row_space[x_cord-1] -= 1
-            board.empty_column_space[y_cord-1] -= 1
-        if (is_valid_position(x_cord,y_cord-1) and board[x_cord][y_cord-1] == None):
-            board[x_cord][y_cord-1] = 'w'
-            board.empty_row_space[x_cord] -= 1
-            board.empty_column_space[y_cord-1] -= 1
-        if (is_valid_position(x_cord+1,y_cord-1) and board[x_cord+1][y_cord-1] == None):
-            board[x_cord+1][y_cord-1] = 'w'
-            board.empty_row_space[x_cord+1] -= 1
-            board.empty_column_space[y_cord-1] -= 1
-        if (is_valid_position(x_cord-1,y_cord+size) and board[x_cord-1][y_cord+size] == None):
-            board[x_cord-1][y_cord+size] = 'w'
-            board.empty_row_space[x_cord-1] -= 1
-            board.empty_column_space[y_cord+size] -= 1
-        if (is_valid_position(x_cord,y_cord+size) and board[x_cord][y_cord+size] == None):
-            board[x_cord][y_cord+size] = 'w'
-            board.empty_row_space[x_cord] -= 1
-            board.empty_column_space[y_cord+size] -= 1
-        if (is_valid_position(x_cord+1,y_cord+size) and board[x_cord+1][y_cord+size] == None):
-            board[x_cord+1][y_cord+size] = 'w'
-            board.empty_row_space[x_cord+1] -= 1
-            board.empty_column_space[y_cord+size] -= 1
-        for i in range(size):
-            if (is_valid_position(x_cord-1,y_cord+i) and board[x_cord-1][y_cord+i] == None):
-                board[x_cord-1][y_cord+i] = 'w'
+        if (is_valid_position(x_cord-1,y_cord-1)):
+            if (board[x_cord-1][y_cord-1] != None and board[x_cord-1][y_cord-1] != 'w' and
+                board[x_cord-1][y_cord-1] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord-1][y_cord-1] == None):
+                board[x_cord-1][y_cord-1] = 'w'
                 board.empty_row_space[x_cord-1] -= 1
-                board.empty_column_space[y_cord+i] -= 1
-            if (is_valid_position(x_cord+1,y_cord+i) and board[x_cord+1][y_cord+i] == None):
-                board[x_cord+1][y_cord+i] = 'w'
-                board.empty_row_space[x_cord+1] -= 1
-                board.empty_column_space[y_cord+i] -= 1
-    else:
-        if (is_valid_position(x_cord-1,y_cord-1) and board[x_cord-1][y_cord-1] == None):
-            board[x_cord-1][y_cord-1] = 'w'
-            board.empty_row_space[x_cord-1] -= 1
-            board.empty_column_space[y_cord-1] -= 1
-        if (is_valid_position(x_cord-1,y_cord) and board[x_cord-1][y_cord] == None):
-            board[x_cord-1][y_cord] = 'w'
-            board.empty_row_space[x_cord-1] -= 1
-            board.empty_column_space[y_cord] -= 1
-        if (is_valid_position(x_cord-1,y_cord+1) and board[x_cord-1][y_cord+1] == None):
-            board[x_cord-1][y_cord+1] = 'w'
-            board.empty_row_space[x_cord-1] -= 1
-            board.empty_column_space[y_cord+1] -= 1
-        if (is_valid_position(x_cord+size,y_cord-1) and board[x_cord+size][y_cord-1] == None):
-            board[x_cord+size][y_cord-1] = 'w'
-            board.empty_row_space[x_cord+size] -= 1
-            board.empty_column_space[y_cord-1] -= 1
-        if (is_valid_position(x_cord+size,y_cord) and board[x_cord+size][y_cord] == None):
-            board[x_cord+size][y_cord] = 'w'
-            board.empty_row_space[x_cord+size] -= 1
-            board.empty_column_space[y_cord] -= 1
-        if (is_valid_position(x_cord+size,y_cord+1) and board[x_cord+size][y_cord+1] == None):
-            board[x_cord+size][y_cord+1] = 'w'
-            board.empty_row_space[x_cord+size] -= 1
-            board.empty_column_space[y_cord+1] -= 1
-        for i in range(size):
-            if (is_valid_position(x_cord+i,y_cord-1) and board[x_cord+i][y_cord-1] == None):
-                board[x_cord+i][y_cord-1] = 'w'
-                board.empty_row_space[x_cord+i] -= 1
                 board.empty_column_space[y_cord-1] -= 1
-            if (is_valid_position(x_cord+size,y_cord+1) and board[x_cord+i][y_cord+1] == None):
-                board[x_cord+i][y_cord+1] = 'w'
-                board.empty_row_space[x_cord+i] -= 1
+        if (is_valid_position(x_cord,y_cord-1)):
+            if (board[x_cord][y_cord-1] != None and board[x_cord][y_cord-1] != 'w' and
+                board[x_cord][y_cord-1] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord][y_cord-1] == None):
+                board[x_cord][y_cord-1] = 'w'
+                board.empty_row_space[x_cord] -= 1
+                board.empty_column_space[y_cord-1] -= 1
+        if (is_valid_position(x_cord+1,y_cord-1)):
+            if (board[x_cord+1][y_cord-1] != None and board[x_cord+1][y_cord-1] != 'w' and
+                board[x_cord+1][y_cord-1] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord+1][y_cord-1] == None):
+                board[x_cord+1][y_cord-1] = 'w'
+                board.empty_row_space[x_cord+1] -= 1
+                board.empty_column_space[y_cord-1] -= 1
+        if (is_valid_position(x_cord-1,y_cord+size)):
+            if (board[x_cord-1][y_cord+size] != None and board[x_cord-1][y_cord+size] != 'w' and
+                board[x_cord-1][y_cord+size] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord-1][y_cord+size] == None):
+                board[x_cord-1][y_cord+size] = 'w'
+                board.empty_row_space[x_cord-1] -= 1
+                board.empty_column_space[y_cord+size] -= 1
+        if (is_valid_position(x_cord,y_cord+size)):
+            if (board[x_cord][y_cord+size] != None and board[x_cord][y_cord+size] != 'w' and
+                board[x_cord][y_cord+size] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord][y_cord+size] == None):
+                board[x_cord][y_cord+size] = 'w'
+                board.empty_row_space[x_cord] -= 1
+                board.empty_column_space[y_cord+size] -= 1
+        if (is_valid_position(x_cord+1,y_cord+size)):
+            if (board[x_cord+1][y_cord+size] != None and board[x_cord+1][y_cord+size] != 'w' and
+                board[x_cord+1][y_cord+size] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord+1][y_cord+size] == None):
+                board[x_cord+1][y_cord+size] = 'w'
+                board.empty_row_space[x_cord+1] -= 1
+                board.empty_column_space[y_cord+size] -= 1
+        for i in range(size):
+            if (is_valid_position(x_cord-1,y_cord+i)):
+                if (board[x_cord-1][y_cord+i] != None and board[x_cord-1][y_cord+i] != 'w' and
+                board[x_cord-1][y_cord+i] != 'W'):
+                    board.valid_path = False
+                    return
+                if(board[x_cord-1][y_cord+i] == None):
+                    board[x_cord-1][y_cord+i] = 'w'
+                    board.empty_row_space[x_cord-1] -= 1
+                    board.empty_column_space[y_cord+i] -= 1
+            if (is_valid_position(x_cord+1,y_cord+i)):
+                if (board[x_cord+1][y_cord+i] != None and board[x_cord+1][y_cord+i] != 'w' and
+                board[x_cord+1][y_cord+i] != 'W'):
+                    board.valid_path = False
+                    return
+                if(board[x_cord+1][y_cord+i] == None):
+                    board[x_cord+1][y_cord+i] = 'w'
+                    board.empty_row_space[x_cord+1] -= 1
+                    board.empty_column_space[y_cord+i] -= 1
+    else:
+        if (is_valid_position(x_cord-1,y_cord-1)):
+            if (board[x_cord-1][y_cord-1] != None and board[x_cord-1][y_cord-1] != 'w' and
+            board[x_cord-1][y_cord-1] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord-1][y_cord-1] == None):
+                board[x_cord-1][y_cord-1] = 'w'
+                board.empty_row_space[x_cord-1] -= 1
+                board.empty_column_space[y_cord-1] -= 1
+        if (is_valid_position(x_cord-1,y_cord)):
+            if (board[x_cord-1][y_cord] != None and board[x_cord-1][y_cord] != 'w' and
+            board[x_cord-1][y_cord] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord-1][y_cord] == None):
+                board[x_cord-1][y_cord] = 'w'
+                board.empty_row_space[x_cord-1] -= 1
+                board.empty_column_space[y_cord] -= 1
+        if (is_valid_position(x_cord-1,y_cord+1)):
+            if (board[x_cord-1][y_cord+1] != None and board[x_cord-1][y_cord+1] != 'w' and
+            board[x_cord-1][y_cord+1] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord-1][y_cord+1] == None):
+                board[x_cord-1][y_cord+1] = 'w'
+                board.empty_row_space[x_cord-1] -= 1
                 board.empty_column_space[y_cord+1] -= 1
+        if (is_valid_position(x_cord+size,y_cord-1)):
+            if (board[x_cord+size][y_cord-1] != None and board[x_cord+size][y_cord-1] != 'w' and
+            board[x_cord+size][y_cord-1] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord+size][y_cord-1] == None):
+                board[x_cord+size][y_cord-1] = 'w'
+                board.empty_row_space[x_cord+size] -= 1
+                board.empty_column_space[y_cord-1] -= 1
+        if (is_valid_position(x_cord+size,y_cord)):
+            if (board[x_cord+size][y_cord] != None and board[x_cord+size][y_cord] != 'w' and
+            board[x_cord+size][y_cord] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord+size][y_cord] == None):
+                board[x_cord+size][y_cord] = 'w'
+                board.empty_row_space[x_cord+size] -= 1
+                board.empty_column_space[y_cord] -= 1
+        if (is_valid_position(x_cord+size,y_cord+1)):
+            if (board[x_cord+size][y_cord+1] != None and board[x_cord+size][y_cord+1] != 'w' and
+            board[x_cord+size][y_cord+1] != 'W'):
+                board.valid_path = False
+                return
+            if(board[x_cord+size][y_cord+1] == None): 
+                board[x_cord+size][y_cord+1] = 'w'
+                board.empty_row_space[x_cord+size] -= 1
+                board.empty_column_space[y_cord+1] -= 1
+        for i in range(size):
+            if (is_valid_position(x_cord+i,y_cord-1)):
+                if (board[x_cord+i][y_cord-1] != None and board[x_cord+i][y_cord-1] != 'w' and
+                board[x_cord+i][y_cord-1] != 'W'):
+                    board.valid_path = False
+                    return
+            if(board[x_cord+i][y_cord-1] == None): 
+                    board[x_cord+i][y_cord-1] = 'w'
+                    board.empty_row_space[x_cord+i] -= 1
+                    board.empty_column_space[y_cord-1] -= 1
+            if (is_valid_position(x_cord+size,y_cord+1)):
+                if (board[x_cord+i][y_cord+1] != None and board[x_cord+i][y_cord+1] != 'w' and
+                board[x_cord+i][y_cord+1] != 'W'):
+                    board.valid_path = False
+                    return
+                if(board[x_cord+i][y_cord+1] == None):
+                    board[x_cord+i][y_cord+1] = 'w'
+                    board.empty_row_space[x_cord+i] -= 1
+                    board.empty_column_space[y_cord+1] -= 1
+
+
+#Fills a row or column with water
+def fill_water(board: Board, value, direction):
+
+    if (direction == "horizontal"):
+        for i in range(10):
+            if (board[value][i] == None):
+                board[value][i] = 'w'
+                board.empty_row_space[value] -= 1
+                board.empty_column_space[i] -= 1
+
+    else:
+        for i in range(10):
+            if (board[i][value] == None):
+                board[i][value] = 'w'
+                board.empty_row_space[i] -= 1
+                board.empty_column_space[value] -= 1
 
 
 #Check if in hints list is a completed boat
